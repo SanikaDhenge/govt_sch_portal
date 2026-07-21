@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Maharashtra Farmer Scheme Portal | शेतकरी योजना</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Playfair+Display:wght@700;900&family=Noto+Sans+Devanagari:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <p id="loadingText">Matching your profile with government schemes...</p>
+</div>
+
+<div class="toast-notif" id="toastNotif">
+  <div class="toast-icon" id="toastIcon">✅</div>
+  <div style="flex:1">
+    <div class="toast-title" id="toastTitle">Success</div>
+    <div class="toast-msg" id="toastMsg"></div>
+  </div>
+  <button class="toast-close-x" onclick="closeToast()">✕</button>
+</div>
+
+<div class="return-banner" id="returnBanner">
+  <div class="rb-icon">🔔</div>
+  <div class="rb-text">
+    <h4 id="returnBannerTitle">Welcome back!</h4>
+    <p id="returnBannerMsg">You have pending scheme applications to check.</p>
+  </div>
+  <div class="rb-actions">
+    <button class="rb-btn rb-btn-primary" onclick="openAppPanel()">View Status</button>
+    <button class="rb-btn rb-btn-close" onclick="dismissReturnBanner()">✕</button>
+  </div>
+</div>
+
+<div class="topbar">
+  <span>🇮🇳 Government of Maharashtra — Official Farmer Scheme Portal</span>
+  <div>
+    <a href="javascript:void(0)" onclick="changeLanguage('mr')">मराठी</a>
+    <a href="javascript:void(0)" onclick="changeLanguage('hi')">हिंदी</a>
+    <a href="javascript:void(0)" onclick="changeLanguage('en')">English</a>
+    <a href="tel:18002334000">📞 1800-233-4000</a>
+  </div>
+</div>
+
+<header>
+  <div class="hdr-inner">
+    <div class="logo" onclick="scrollToTop()">
+      <div class="logo-icon">🌾</div>
+      <div class="logo-text">
+        <h1>Maharashtra Farmer Portal</h1>
+        <p>महाराष्ट्र शेतकरी योजना पोर्टल</p>
+      </div>
+    </div>
+    <nav class="main-nav">
+      <a href="#home" class="active" data-i18n="nav_home">🏠 Home</a>
+      <a href="#schemes" data-i18n="nav_schemes">📋 All Schemes</a>
+      <a href="#dashboard" id="dashboardLink" style="display:none" data-i18n="nav_dashboard">📊 Dashboard</a>
+      <a href="#adminDashboard" id="adminDashboardLink" style="display:none" data-i18n="nav_admin_panel">🏛️ Admin Panel</a>
+      <a href="#register" id="authLink" onclick="showRegister()" data-i18n="nav_register_new">Register</a>
+      <a href="#register" id="registerNewUserLink" style="display:none" onclick="showRegisterNewUser()" data-i18n="nav_register_new">Register New User</a>
+      <!-- Language Dropdown -->
+      <div class="lang-dropdown-container">
+        <button class="lang-dropbtn" id="langSelectBtn">🌐 <span id="selectedLangName">English</span> ▾</button>
+        <div class="lang-dropdown-content" id="langDropdown"></div>
+      </div>
+      <button class="notif-btn" onclick="openAppPanel()" title="My Applications" id="notifBtn">
+        <span class="bell">🔔</span>
+        <span class="notif-badge" id="notifBadge" style="display:none">0</span>
+      </button>
+      <a href="#login" id="logoutLink" style="display:none" onclick="handleLogout()" data-i18n="nav_logout">Logout</a>
+      <a href="#login" class="nav-cta" id="loginCta" onclick="showLogin()" data-i18n="nav_login">🔐 Login</a>
+    </nav>
+  </div>
+</header>
+
+<div class="app-panel-overlay" id="appPanelOverlay" onclick="closeAppPanel(event)">
+  <div class="app-panel">
+    <div class="app-panel-head">
+      <div>
+        <h2>📋 My Applications</h2>
+        <p>Track schemes you've visited & applied for</p>
+      </div>
+      <button class="panel-close" onclick="closeAppPanelBtn()">✕</button>
+    </div>
+    <div class="app-panel-body">
+      <div class="app-stats-row" id="appStats"></div>
+      
+      <!-- Sub-navigation tabs for filtering -->
+      <div class="admin-tabs" style="display:flex;gap:8px;margin-bottom:16px;border-bottom:1px solid var(--border);padding-bottom:8px">
+        <button class="filter-btn active" id="btnAppTabNotFilled" onclick="setAppPanelTab('not_filled')" style="font-size:11px;padding:6px 12px">📝 Not Filled Yet</button>
+        <button class="filter-btn" id="btnAppTabApplied" onclick="setAppPanelTab('applied')" style="font-size:11px;padding:6px 12px">✅ Applied</button>
+      </div>
+      
+      <div id="appListContainer"></div>
+    </div>
+  </div>
+</div>
+
+<div class="hero" id="home">
+  <div class="hero-inner container">
+    <div>
+      <div class="hero-eyebrow" data-i18n="hero_eyebrow">🌾 Official Maharashtra Govt Portal</div>
+      <h2 data-i18n="hero_title">Find Government Schemes for Maharashtra Farmers</h2>
+      <p data-i18n="hero_desc">Access all 30 State & Central schemes — matched to your income, land, category & crop. Register once, discover every benefit you qualify for.</p>
+      <div class="hero-btns">
+        <a href="#login" class="btn-primary" onclick="showLogin()" data-i18n="hero_login_btn">🔐 Login to Check Eligibility</a>
+        <a href="#schemes" class="btn-outline-w" data-i18n="hero_browse_btn">📋 Browse All Schemes</a>
+      </div>
+    </div>
+    <div class="hero-stats">
+      <div class="hstat"><div class="num">30+</div><div class="lbl" data-i18n="stat_active_schemes">Active Schemes</div></div>
+      <div class="hstat"><div class="num">1.2Cr+</div><div class="lbl" data-i18n="stat_farmers_registered">Farmers Registered</div></div>
+      <div class="hstat"><div class="num">₹42K</div><div class="lbl" data-i18n="stat_avg_benefit">Avg Annual Benefit</div></div>
+      <div class="hstat"><div class="num">24/7</div><div class="lbl" data-i18n="stat_online_access">Online Access</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="ticker">
+  <div class="ticker-inner">
+    <span>🌾 PM-KISAN ₹6,000/yr</span><span>🛡️ PMFBY Crop Insurance</span>
+    <span>💳 Kisan Credit Card 4%</span><span>🍋 Bhausaheb Fundkar 100%</span>
+    <span>☀️ Solar Pump 90% Subsidy</span><span>🛡️ Gopinath Munde ₹2L Cover</span>
+    <span>💧 CM Farm Pond Scheme</span><span>🏹 Birsa Munda ST Only</span>
+    <span>🔵 Dr. Ambedkar SC Only</span><span>📈 Bhavantar Bharpai Yojana</span>
+    <span>🌾 PM-KISAN ₹6,000/yr</span><span>🛡️ PMFBY Crop Insurance</span>
+    <span>💳 Kisan Credit Card 4%</span><span>🍋 Bhausaheb Fundkar 100%</span>
+    <span>☀️ Solar Pump 90% Subsidy</span><span>🛡️ Gopinath Munde ₹2L Cover</span>
+    <span>💧 CM Farm Pond Scheme</span><span>🏹 Birsa Munda ST Only</span>
+    <span>🔵 Dr. Ambedkar SC Only</span><span>📈 Bhavantar Bharpai Yojana</span>
+  </div>
+</div>
+
+<div class="section section-white">
+  <div class="container">
+    <div class="section-head">
+      <div class="stag">Simple Process</div>
+      <h2>How It Works</h2>
+      <p>Get your personalized scheme list in 4 simple steps</p>
+    </div>
+    <div class="steps-grid">
+      <div class="step-card"><div class="step-num">1</div><div class="step-icon">🔐</div><h3>Login</h3><p>Enter your Aadhaar number and password to access your account securely.</p></div>
+      <div class="step-card"><div class="step-num">2</div><div class="step-icon">📝</div><h3>Fill Farm Details</h3><p>Enter income, land area, crop type, and category.</p></div>
+      <div class="step-card"><div class="step-num">3</div><div class="step-icon">🔍</div><h3>Smart Matching</h3><p>System matches your profile with all 25 eligible Central & State schemes.</p></div>
+      <div class="step-card"><div class="step-num">4</div><div class="step-icon">📋</div><h3>Track Applications</h3><p>Click "Apply" on any scheme — your application is tracked automatically here.</p></div>
+    </div>
+  </div>
+</div>
+
+<div class="section section-white" id="loginSection" style="display:none">
+  <div class="container">
+    <div class="login-container">
+      <div class="login-card">
+        <div class="admin-tabs" style="display:flex;gap:8px;margin-bottom:20px;border-bottom:1px solid var(--border);padding-bottom:8px">
+          <button class="filter-btn active" id="btnLoginTabFarmer" onclick="switchLoginTab('farmer')" style="flex:1;font-size:12px;padding:8px" data-i18n="login_btn_tab_farmer">🌾 Farmer Login</button>
+          <button class="filter-btn" id="btnLoginTabAdmin" onclick="switchLoginTab('admin')" style="flex:1;font-size:12px;padding:8px" data-i18n="login_btn_tab_admin">🏛️ Admin Login</button>
+        </div>
+
+        <h2 id="loginTitle" data-i18n="login_title">🔐 Farmer Login</h2>
+        <p id="loginSubtitle" data-i18n="login_subtitle">Login with your Aadhaar number and password</p>
+        
+        <div class="notice-bar" id="loginNoticeBar" style="margin-bottom:20px;background:var(--saffron-lt);border-color:var(--saffron)">
+          <span style="font-size:20px;flex-shrink:0">📢</span>
+          <div><strong style="color:var(--saffron)">First-time users:</strong> You must register before you can login. Click "Register here" below to create your account.</div>
+        </div>
+        
+        <div id="farmerLoginFields">
+          <div class="form-group">
+            <label><span data-i18n="login_aadhaar">Aadhaar Number</span> <span class="req">*</span></label>
+            <input type="text" id="loginAadhaar" placeholder="XXXX XXXX XXXX" maxlength="14" oninput="fmtAadhaar(this)" data-i18n-placeholder="login_aadhaar">
+            <div class="input-note" data-i18n="login_note_aadhaar">Enter your 12-digit Aadhaar number</div>
+          </div>
+        </div>
+        
+        <div id="adminLoginFields" style="display:none">
+          <div class="form-group">
+            <label><span data-i18n="login_username">Username</span> <span class="req">*</span></label>
+            <input type="text" id="loginUsername" placeholder="Enter Admin Username" data-i18n-placeholder="login_username">
+            <div class="input-note" data-i18n="login_note_username">Enter your administrative username</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label><span data-i18n="login_password">Password</span> <span class="req">*</span></label>
+          <input type="password" id="loginPassword" placeholder="Enter your password" data-i18n-placeholder="login_password">
+          <div class="input-note" id="loginPasswordNote" data-i18n="login_note_password_farmer">Enter the password you created during registration</div>
+        </div>
+        
+        <button class="btn-submit" id="btnLoginButton" style="width:100%;margin-top:20px" onclick="handleLoginClick()" data-i18n="login_btn">🔐 Login</button>
+        
+        <div class="login-toggle" id="loginToggleDiv" style="margin-top:24px">
+          <p>New farmer? <a onclick="showRegister()">Register here</a></p>
+          <p style="font-size:12px;color:var(--muted);margin-top:8px">📊 Registered Users: <strong id="userCountDisplay">0</strong></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section section-alt" id="schemes">
+  <div class="container">
+    <div class="section-head">
+      <div class="stag" data-i18n="nav_schemes">Government Schemes</div>
+      <h2><span data-i18n="nav_schemes">All Schemes</span> <span class="sc-count-badge" id="schemeCountBadge">30</span></h2>
+      <p data-i18n="search_subtitle">All 30 Central & Maharashtra State schemes — First Come First Served from 2025–26</p>
+    </div>
+    <div class="notice-bar">
+      <span style="font-size:22px;flex-shrink:0">📢</span>
+      <div data-i18n="notice_banner_content"><strong style="color:#e65100">MahaDBT Notice 2025–26:</strong> Applications now processed on First Come First Served basis. When you click Apply below, your visit is automatically tracked here. Helpline: <strong>022-61316429</strong></div>
+    </div>
+    <div class="search-section" style="background:#fff;border-radius:16px;padding:20px;margin-bottom:24px;border:1px solid var(--border);box-shadow:0 2px 12px rgba(0,0,0,.06)">
+      <div class="search-header" style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+        <span style="font-size:20px">🔍</span>
+        <h3 style="font-size:16px;color:var(--green);margin:0" data-i18n="search_title">Advanced Scheme Search</h3>
+      </div>
+      <div class="search-controls" style="display:grid;grid-template-columns:1fr auto auto;gap:12px;align-items:end">
+        <div>
+          <input type="text" id="schemeSearchInput" data-i18n-placeholder="search_placeholder" placeholder="Search schemes by name, ministry, or keywords..." style="width:100%;padding:12px 16px;border:2px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif" onkeyup="searchSchemes()">
+        </div>
+        <select id="benefitFilter" style="padding:12px;border:2px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif" onchange="filterSchemes()">
+          <option value="" data-i18n="search_all_benefits">All Benefits</option>
+          <option value="income" data-i18n="search_direct_income">Income Support</option>
+          <option value="subsidy" data-i18n="search_equipment_subsidy">Subsidy</option>
+          <option value="insurance" data-i18n="search_crop_insurance">Insurance</option>
+          <option value="credit" data-i18n="search_interest_subvention">Credit</option>
+          <option value="infrastructure" data-i18n="admin_sidebar_overview">Infrastructure</option>
+        </select>
+        <button class="btn-green" onclick="resetSearch()" style="padding:12px 20px" data-i18n="search_reset">🔄 Reset</button>
+      </div>
+      <div id="searchResults" style="margin-top:12px;font-size:13px;color:var(--muted)"></div>
+    </div>
+    <div class="filter-bar">
+      <button class="filter-btn active" onclick="filterSchemes('all',this)" data-i18n="filter_all">All Schemes</button>
+      <button class="filter-btn" onclick="filterSchemes('central',this)" data-i18n="filter_central">Central Govt</button>
+      <button class="filter-btn" onclick="filterSchemes('state',this)" data-i18n="filter_state">Maharashtra State</button>
+      <button class="filter-btn" onclick="filterSchemes('irrigation',this)" data-i18n="filter_irrigation">Irrigation</button>
+      <button class="filter-btn" onclick="filterSchemes('equipment',this)" data-i18n="filter_equipment">Equipment</button>
+      <button class="filter-btn" onclick="filterSchemes('insurance',this)" data-i18n="filter_insurance">Insurance/Safety</button>
+      <button class="filter-btn" onclick="filterSchemes('horticulture',this)" data-i18n="filter_horticulture">Horticulture</button>
+      <button class="filter-btn" onclick="filterSchemes('tribal',this)" data-i18n="filter_sc_st">SC/ST Schemes</button>
+    </div>
+    <div class="schemes-grid" id="schemesGrid"></div>
+  </div>
+</div>
+
+<div class="section section-alt" id="dashboard" style="display:none">
+  <div class="container">
+    <div class="section-head">
+      <div class="stag" data-i18n="nav_dashboard">My Dashboard</div>
+      <h2 data-i18n="dash_profile_title">🌾 Farmer Profile & Overview</h2>
+      <p data-i18n="dash_profile_subtitle">Your personalized dashboard with scheme recommendations and application tracking</p>
+    </div>
+    
+    <div class="dashboard-grid" style="display:grid;grid-template-columns:2fr 1fr;gap:24px;margin-bottom:32px">
+      <!-- Profile Card -->
+      <div class="profile-card" style="background:#fff;border-radius:16px;padding:24px;border:1px solid var(--border);box-shadow:0 4px 20px rgba(0,0,0,.08)">
+        <div class="profile-header" style="display:flex;align-items:center;gap:16px;margin-bottom:20px">
+          <div class="profile-avatar" style="width:80px;height:80px;background:linear-gradient(135deg,var(--green),var(--green-mid));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:32px;color:#fff">👤</div>
+          <div>
+            <h3 id="dashFarmerName" style="font-size:20px;color:var(--green);margin:0">Welcome, Farmer!</h3>
+            <p id="dashFarmerLocation" style="color:var(--muted);margin:4px 0 0">District: —</p>
+            <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+              <span class="chip chip-g" id="dashIncome">Income: —</span>
+              <span class="chip chip-o" id="dashLand">Land: —</span>
+              <span class="chip chip-b" id="dashCategory">Category: —</span>
+            </div>
+          </div>
+        </div>
+        <div class="profile-stats" style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:20px">
+          <div class="stat-item" style="text-align:center;padding:16px;background:var(--green-lt);border-radius:12px">
+            <div class="stat-number" id="eligibleSchemesCount" style="font-size:24px;font-weight:700;color:var(--green)">0</div>
+            <div class="stat-label" style="font-size:12px;color:var(--muted);margin-top:4px" data-i18n="dash_eligible_schemes_label">Eligible Schemes</div>
+          </div>
+          <div class="stat-item" style="text-align:center;padding:16px;background:var(--saffron-lt);border-radius:12px">
+            <div class="stat-number" id="appliedCount" style="font-size:24px;font-weight:700;color:var(--saffron)">0</div>
+            <div class="stat-label" style="font-size:12px;color:var(--muted);margin-top:4px" data-i18n="dash_total_applications">Applications</div>
+          </div>
+          <div class="stat-item" style="text-align:center;padding:16px;background:#E3F2FD;border-radius:12px">
+            <div class="stat-number" id="totalBenefit" style="font-size:24px;font-weight:700;color:#1565C0">₹0</div>
+            <div class="stat-label" style="font-size:12px;color:var(--muted);margin-top:4px" data-i18n="dash_max_benefits_label">Max Benefits</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Quick Actions -->
+      <div class="quick-actions" style="display:flex;flex-direction:column;gap:12px">
+        <h4 style="font-size:16px;color:var(--green);margin:0 0 12px" data-i18n="dash_quick_actions">Quick Actions</h4>
+        <button class="btn-primary" onclick="showResults()" style="width:100%;justify-content:center" data-i18n="dash_view_eligible_modal">🎯 View Eligible Schemes (Modal)</button>
+        <button class="btn-green" onclick="openAppPanel()" style="width:100%;justify-content:center" data-i18n="dash_track_applications_panel">📋 Track Applications (Panel)</button>
+        <button class="btn-primary" onclick="showRegisterNewUser()" style="width:100%;justify-content:center;background:linear-gradient(135deg,#e65100,#f57c00);border:none" data-i18n="nav_register_new">📝 Register New User</button>
+        <button class="btn-outline-w" onclick="window.print()" style="width:100%;justify-content:center;background:transparent;border:2px solid var(--green);color:var(--green)" data-i18n="dash_print_profile">🖨️ Print Profile</button>
+        <button class="btn-track" onclick="exportProfile()" style="width:100%;justify-content:center" data-i18n="dash_export_data">📥 Export Data</button>
+      </div>
+    </div>
+
+    <!-- Eligible Schemes (Inline Dashboard view) -->
+    <div class="dashboard-section" style="background:#fff;border-radius:16px;padding:24px;border:1px solid var(--border);margin-bottom:32px;position:relative">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;border-bottom:2px solid var(--green-lt);padding-bottom:12px">
+        <h3 style="color:var(--green);margin:0;font-size:1.4em" data-i18n="dash_eligible_schemes_title">🎯 Schemes You Are Eligible For</h3>
+        <span style="font-size:12px;color:var(--muted)" data-i18n="dash_eligible_schemes_subtitle">Matched dynamically against your profile</span>
+      </div>
+      <div id="dashEligibleSpinner" style="display:none;text-align:center;padding:30px">
+        <div class="spinner" style="margin:0 auto;width:36px;height:36px"></div>
+        <p style="margin-top:10px;font-size:12px;color:var(--green)">Fetching eligible schemes...</p>
+      </div>
+      <div id="dashEligibleError" style="display:none;background:#FFEBEE;color:#C62828;padding:12px;border-radius:8px;font-size:13px;margin-bottom:15px"></div>
+      <div id="dashEligibleGrid" class="schemes-grid">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+
+    <!-- Tracked Applications and Status (Inline Dashboard view) -->
+    <div class="dashboard-section" style="background:#fff;border-radius:16px;padding:24px;border:1px solid var(--border)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;border-bottom:2px solid var(--green-lt);padding-bottom:12px">
+        <h3 style="color:var(--green);margin:0;font-size:1.4em" data-i18n="dash_tracked_apps_title">📋 Your Tracked Applications & Status</h3>
+        <span style="font-size:12px;color:var(--muted)" data-i18n="dash_tracked_apps_subtitle">Monitor your progress and update status</span>
+      </div>
+      <div id="dashAppliedContainer" style="display:grid;grid-template-columns:1fr;gap:16px">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Admin Dashboard Section (Sidebar Layout) -->
+<div class="section section-alt" id="adminDashboard" style="display:none;padding:0">
+  <div style="display:grid;grid-template-columns:250px 1fr;min-height:calc(100vh - 120px)">
+    <!-- Sidebar Navigation -->
+    <div style="background:var(--green);color:#fff;padding:24px 16px;display:flex;flex-direction:column;gap:8px">
+      <h3 style="color:var(--gold);font-size:16px;margin-bottom:20px;text-align:center;border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:12px" data-i18n="nav_admin_panel">🏛️ Admin Portal</h3>
+      
+      <button class="filter-btn active" id="btnAdminDashTab" onclick="switchAdminTab('dashboard')" style="background:transparent;color:#fff;border:none;text-align:left;padding:12px;font-size:14px;width:100%;border-radius:8px;display:flex;align-items:center;gap:8px;cursor:pointer" data-i18n="admin_sidebar_overview">📊 Dashboard</button>
+      <button class="filter-btn" id="btnManageSchemes" onclick="switchAdminTab('schemes')" style="background:transparent;color:#fff;border:none;text-align:left;padding:12px;font-size:14px;width:100%;border-radius:8px;display:flex;align-items:center;gap:8px;cursor:pointer" data-i18n="admin_sidebar_schemes">📋 Schemes</button>
+      <button class="filter-btn" id="btnViewFarmers" onclick="switchAdminTab('farmers')" style="background:transparent;color:#fff;border:none;text-align:left;padding:12px;font-size:14px;width:100%;border-radius:8px;display:flex;align-items:center;gap:8px;cursor:pointer" data-i18n="admin_sidebar_farmers">👥 Farmers</button>
+      <button class="filter-btn" id="btnViewApplications" onclick="switchAdminTab('applications')" style="background:transparent;color:#fff;border:none;text-align:left;padding:12px;font-size:14px;width:100%;border-radius:8px;display:flex;align-items:center;gap:8px;cursor:pointer" data-i18n="admin_sidebar_applications">📝 Applications</button>
+      <button class="filter-btn" id="btnAdminNotif" onclick="switchAdminTab('notifications')" style="background:transparent;color:#fff;border:none;text-align:left;padding:12px;font-size:14px;width:100%;border-radius:8px;display:flex;align-items:center;gap:8px;cursor:pointer" data-i18n="admin_sidebar_notifications">🔔 Send Alerts</button>
+      <button class="filter-btn" id="btnAdminSettings" onclick="switchAdminTab('settings')" style="background:transparent;color:#fff;border:none;text-align:left;padding:12px;font-size:14px;width:100%;border-radius:8px;display:flex;align-items:center;gap:8px;cursor:pointer" data-i18n="admin_sidebar_settings">⚙️ Settings</button>
+      
+      <button onclick="handleLogout()" style="margin-top:auto;background:rgba(255,255,255,0.1);color:#fff;border:none;text-align:left;padding:12px;font-size:14px;width:100%;border-radius:8px;display:flex;align-items:center;gap:8px;cursor:pointer" data-i18n="admin_sidebar_logout">🔓 Logout</button>
+    </div>
+    
+    <!-- Main Content Area -->
+    <div style="padding:32px;background:var(--cream);overflow-y:auto;flex:1">
+      
+      <!-- 1. DASHBOARD OVERVIEW TAB -->
+      <div id="adminOverviewTab">
+        <div class="section-head" style="text-align:left;margin-bottom:24px">
+          <h2>📊 Portal Statistics & Overview</h2>
+          <p>Real-time analytics, registrations, and application status stages</p>
+        </div>
+        
+        <!-- Metrics Summary Cards -->
+        <div style="display:grid;grid-template-columns:repeat(4, 1fr);gap:16px;margin-bottom:24px">
+          <div class="app-stat" style="background:#fff">
+            <div class="asn" id="statTotalFarmers">0</div>
+            <div class="asl">Total Farmers</div>
+          </div>
+          <div class="app-stat" style="background:#fff">
+            <div class="asn" id="statTotalApplications">0</div>
+            <div class="asl">Total Applications</div>
+          </div>
+          <div class="app-stat" style="background:#fff">
+            <div class="asn" id="statApprovedAmount">₹0</div>
+            <div class="asl">Est. Disbursed Amount</div>
+          </div>
+          <div class="app-stat" style="background:#fff">
+            <div class="asn" id="statKycCompletion">0%</div>
+            <div class="asl">KYC Completion Rate</div>
+          </div>
+        </div>
+
+        <!-- Distributions Charts -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:32px">
+          <div style="background:#fff;border-radius:12px;padding:20px;border:1px solid var(--border)">
+            <h4 style="color:var(--green);margin-bottom:15px;border-bottom:1px solid var(--border);padding-bottom:8px">District-wise Farmer Distribution</h4>
+            <div id="chartDistrictDistribution" style="display:flex;flex-direction:column;gap:12px">
+              <!-- Dynamic pure CSS bars -->
+            </div>
+          </div>
+          <div style="background:#fff;border-radius:12px;padding:20px;border:1px solid var(--border)">
+            <h4 style="color:var(--green);margin-bottom:15px;border-bottom:1px solid var(--border);padding-bottom:8px">Application Stages Distribution</h4>
+            <div id="chartStageDistribution" style="display:flex;flex-direction:column;gap:12px">
+              <!-- Dynamic pure CSS bars -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Registrations Section -->
+        <div style="background:#fff;border-radius:12px;padding:20px;border:1px solid var(--border)">
+          <h4 style="color:var(--green);margin-bottom:15px;border-bottom:1px solid var(--border);padding-bottom:8px">Recent Farmer Registrations</h4>
+          <div class="admin-table-container" style="margin-top:0;box-shadow:none;border:none">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Farmer Name</th>
+                  <th>Mobile Number</th>
+                  <th>District</th>
+                  <th>State</th>
+                  <th>Registration Date</th>
+                </tr>
+              </thead>
+              <tbody id="recentRegistrationsTableBody">
+                <!-- Rendered dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 2. SCHEME MANAGEMENT TAB -->
+      <div id="adminSchemesTab" style="display:none">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+          <div>
+            <h3 style="color:var(--green);margin:0;font-size:24px">📋 Government Scheme List</h3>
+            <p style="color:var(--muted);font-size:13px;margin-top:4px">Add, edit, publish/unpublish, or delete schemes from user matches</p>
+          </div>
+          <button class="btn-primary" onclick="openSchemeModal()">➕ Add New Scheme</button>
+        </div>
+        <div class="admin-table-container">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Scheme Name</th>
+                <th>Ministry / Department</th>
+                <th>Benefit Description</th>
+                <th>Type</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="adminSchemesTableBody">
+              <!-- Populated dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
+      <!-- 3. FARMER MANAGEMENT TAB -->
+      <div id="adminFarmersTab" style="display:none">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+          <div>
+            <h3 style="color:var(--green);margin:0;font-size:24px">👥 Registered Farmers Management</h3>
+            <p style="color:var(--muted);font-size:13px;margin-top:4px">Verify document KYC uploads and browse details</p>
+          </div>
+          <button class="btn-track" onclick="exportFarmerList()">📥 Export Farmers (JSON)</button>
+        </div>
+
+        <!-- Filter and Search controls -->
+        <div class="search-section" style="background:#fff;border-radius:12px;padding:16px;margin-bottom:20px;border:1px solid var(--border)">
+          <div class="search-controls" style="display:grid;grid-template-columns:1fr auto auto auto;gap:12px;align-items:end">
+            <div>
+              <label style="font-size:11px">Search Farmers</label>
+              <input type="text" id="adminFarmerSearchInput" placeholder="Search by name or Aadhaar..." style="padding:10px" onkeyup="loadAdminFarmers()">
+            </div>
+            <div>
+              <label style="font-size:11px">Category</label>
+              <select id="adminFarmerCategoryFilter" style="padding:10px" onchange="loadAdminFarmers()">
+                <option value="all">All Categories</option>
+                <option value="General">General</option>
+                <option value="SC">SC</option>
+                <option value="ST">ST</option>
+                <option value="OBC">OBC</option>
+              </select>
+            </div>
+            <div>
+              <label style="font-size:11px">District</label>
+              <select id="adminFarmerDistrictFilter" style="padding:10px" onchange="loadAdminFarmers()">
+                <option value="all">All Districts</option>
+                <option value="Pune">Pune</option>
+                <option value="Nashik">Nashik</option>
+                <option value="Nagpur">Nagpur</option>
+                <option value="Aurangabad">Aurangabad</option>
+                <option value="Amravati">Amravati</option>
+                <option value="Latur">Latur</option>
+                <option value="Thane">Thane</option>
+                <option value="Kolhapur">Kolhapur</option>
+                <option value="Solapur">Solapur</option>
+                <option value="Jalgaon">Jalgaon</option>
+              </select>
+            </div>
+            <button class="btn-green" onclick="resetAdminFarmerFilters()" style="padding:10px 18px">🔄 Reset</button>
+          </div>
+        </div>
+
+        <div class="admin-table-container">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Farmer Name</th>
+                <th>Aadhaar</th>
+                <th>Location</th>
+                <th>Land size</th>
+                <th>Income</th>
+                <th>Category</th>
+                <th>KYC Documents</th>
+                <th>KYC Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="adminFarmersTableBody">
+              <!-- Populated dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 4. TRACK APPLICATIONS TAB -->
+      <div id="adminApplicationsTab" style="display:none">
+        <h3 style="color:var(--green);margin-bottom:4px;font-size:24px">📝 Track Scheme Applications</h3>
+        <p style="color:var(--muted);font-size:13px;margin-bottom:20px">View and advance stages of farmer matches</p>
+        <div class="admin-table-container">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>App ID</th>
+                <th>Farmer Name</th>
+                <th>Scheme Name</th>
+                <th>Ministry</th>
+                <th>Applied Date</th>
+                <th>Current Status</th>
+                <th>Change Stage</th>
+              </tr>
+            </thead>
+            <tbody id="adminApplicationsTableBody">
+              <!-- Populated dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 5. NOTIFICATIONS TAB -->
+      <div id="adminNotificationsTab" style="display:none">
+        <div style="display:grid;grid-template-columns:1.2fr 1fr;gap:24px">
+          <div>
+            <h3 style="color:var(--green);margin-bottom:6px;font-size:24px">🔔 Send Alerts & Reminders</h3>
+            <p style="color:var(--muted);font-size:13px;margin-bottom:20px">Broadcast notifications to all registered farmers instantly</p>
+            <div style="background:#fff;border-radius:16px;padding:24px;border:1px solid var(--border)">
+              <form id="adminNotificationForm" onsubmit="handleNotificationSubmit(event)">
+                <div class="form-group">
+                  <label>Alert Title <span class="req">*</span></label>
+                  <input type="text" id="notifTitle" required placeholder="e.g. PM-KISAN Deadline Extended">
+                </div>
+                <div class="form-group">
+                  <label>Message / Announcement Details <span class="req">*</span></label>
+                  <textarea id="notifMessage" required style="width:100%;height:100px;padding:12px;border:2px solid var(--border);border-radius:10px;font-family:inherit" placeholder="Enter notification message..."></textarea>
+                </div>
+                <div class="form-group">
+                  <label>Category Type <span class="req">*</span></label>
+                  <select id="notifType">
+                    <option value="announcement">📢 Announcement</option>
+                    <option value="scheme_alert">🌾 New Scheme Alert</option>
+                    <option value="deadline">⏰ Deadline Reminder</option>
+                  </select>
+                </div>
+                <button type="submit" class="btn-submit" style="width:100%;margin-top:15px">🔔 Send Broadcast</button>
+              </form>
+            </div>
+          </div>
+          
+          <div>
+            <h3 style="color:var(--green);margin-bottom:6px;font-size:24px">📋 Broadcast History</h3>
+            <p style="color:var(--muted);font-size:13px;margin-bottom:20px">View recent announcements sent to users</p>
+            <div id="adminNotificationsList" style="display:flex;flex-direction:column;gap:12px">
+              <!-- Rendered dynamically -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6. SETTINGS TAB -->
+      <div id="adminSettingsTab" style="display:none">
+        <h3 style="color:var(--green);margin-bottom:6px;font-size:24px">⚙️ Administrative Settings</h3>
+        <p style="color:var(--muted);font-size:13px;margin-bottom:20px">Manage security configuration and change password</p>
+        <div style="background:#fff;border-radius:16px;padding:24px;border:1px solid var(--border);max-width:500px">
+          <form id="adminPasswordForm" onsubmit="handleAdminPasswordChange(event)">
+            <div class="form-group">
+              <label>Current Administrator Password <span class="req">*</span></label>
+              <input type="password" id="adminOldPassword" required placeholder="Enter current admin password">
+            </div>
+            <div class="form-group">
+              <label>New Password <span class="req">*</span></label>
+              <input type="password" id="adminNewPassword" required placeholder="Enter new password (min. 6 characters)">
+            </div>
+            <div class="form-group">
+              <label>Confirm New Password <span class="req">*</span></label>
+              <input type="password" id="adminConfirmNewPassword" required placeholder="Re-enter new password">
+            </div>
+            <button type="submit" class="btn-submit" style="width:100%;margin-top:15px">⚙️ Update Password</button>
+          </form>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+</div>
+
+<div class="section section-white" id="register" style="display:none">
+  <div class="container">
+    <div class="reg-container">
+      <div class="reg-info">
+        <div class="stag stag-orange" style="display:inline-block;margin-bottom:12px" data-i18n="nav_register_new">Register Now</div>
+        <h2 data-i18n="register_title">Check Your Scheme Eligibility</h2>
+        <p data-i18n="register_subtitle">Register once and get a personalized list of all government schemes you qualify for. All benefits are processed securely and transparently.</p>
+        <ul class="feat-list">
+          <li>Aadhaar-based secure password authentication</li>
+          <li>Income eligibility matching</li>
+          <li>All 25 Central + Maharashtra State schemes</li>
+          <li>Auto-track when you visit official portals</li>
+          <li>Application status timeline in your dashboard</li>
+          <li>SMS/WhatsApp notifications on key updates</li>
+        </ul>
+      </div>
+      <div class="form-card">
+        <div class="prog-bar">
+          <div class="prog-step active" id="ps1"><div class="prog-dot">1</div><div class="prog-lbl" data-i18n="step1_title">Identity</div></div>
+          <div class="prog-step" id="ps2"><div class="prog-dot">2</div><div class="prog-lbl" data-i18n="step2_title">Personal</div></div>
+          <div class="prog-step" id="ps3"><div class="prog-dot">3</div><div class="prog-lbl" data-i18n="step3_title">Farm & Crops</div></div>
+          <div class="prog-step" id="ps4"><div class="prog-dot">4</div><div class="prog-lbl" data-i18n="step4_title">Category & Submit</div></div>
+        </div>
+
+        <!-- Step 1: Identity & Credentials -->
+        <div class="form-step active" id="step1">
+          <div class="form-group">
+            <label><span data-i18n="login_aadhaar">Aadhaar Number</span> <span class="req">*</span></label>
+            <input type="text" id="aadhaarNum" placeholder="XXXX XXXX XXXX" maxlength="14" oninput="fmtAadhaar(this)" data-i18n-placeholder="login_aadhaar">
+            <div class="input-note" data-i18n="login_note_aadhaar">Enter your 12-digit Aadhaar number for verification</div>
+          </div>
+          <div class="form-group">
+            <label><span data-i18n="login_password">Create Password</span> <span class="req">*</span></label>
+            <input type="password" id="password" placeholder="Create a strong password" oninput="updatePasswordStrength()" data-i18n-placeholder="login_password">
+            <div class="password-strength">
+              <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
+              <div id="strengthText"></div>
+            </div>
+            <div class="input-note">Minimum 6 characters. Use letters, numbers & special characters.</div>
+          </div>
+          <div class="form-group">
+            <label><span data-i18n="login_password">Confirm Password</span> <span class="req">*</span></label>
+            <input type="password" id="confirmPassword" placeholder="Confirm your password" data-i18n-placeholder="login_password">
+          </div>
+          <div class="step-actions">
+            <button class="btn-next" onclick="nextStep(1)" data-i18n="btn_next">Continue →</button>
+          </div>
+        </div>
+
+        <!-- Step 2: Personal Details & Location -->
+        <div class="form-step" id="step2">
+          <div class="form-row">
+            <div class="form-group"><label><span data-i18n="label_fullName">Full Name</span> <span class="req">*</span></label><input type="text" id="fullName" placeholder="As per Aadhaar" data-i18n-placeholder="label_fullName"></div>
+            <div class="form-group"><label><span data-i18n="label_mobileNum">Mobile Number</span> <span class="req">*</span></label><input type="tel" id="mobileNum" placeholder="10-digit number" maxlength="10" data-i18n-placeholder="label_mobileNum"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label data-i18n="label_email">Email Address</label><input type="email" id="emailId" placeholder="farmer@example.com (optional)"></div>
+            <div class="form-group"><label><span data-i18n="label_dob">Date of Birth</span> <span class="req">*</span></label><input type="date" id="dob" max="2016-01-01"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group" style="flex: 1;"><label><span data-i18n="label_gender">Gender</span> <span class="req">*</span></label><select id="gender"><option value="" data-i18n="label_select">Select</option><option value="Male">Male</option><option value="Female">Female</option><option value="Transgender">Transgender</option></select></div>
+            <div class="form-group" style="flex: 1;"><label><span data-i18n="label_pinCode">PIN Code</span> <span class="req">*</span></label><input type="text" id="pinCode" placeholder="6-digit PIN code" maxlength="6" data-i18n-placeholder="label_pinCode"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label><span data-i18n="label_state">State</span> <span class="req">*</span></label>
+              <select id="state">
+                <option value="" data-i18n="label_select_state">Select State</option>
+                <option value="Maharashtra" selected>Maharashtra</option>
+                <option value="Gujarat">Gujarat</option>
+                <option value="Madhya Pradesh">Madhya Pradesh</option>
+                <option value="Karnataka">Karnataka</option>
+                <option value="Goa">Goa</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label><span data-i18n="label_district">District</span> <span class="req">*</span></label>
+              <select id="district">
+                <option value="" data-i18n="label_select_district">Select District</option>
+                <option>Pune</option><option>Nashik</option><option>Aurangabad</option><option>Nagpur</option>
+                <option>Kolhapur</option><option>Solapur</option><option>Satara</option><option>Sangli</option>
+                <option>Ahmednagar</option><option>Jalgaon</option><option>Amravati</option><option>Latur</option>
+                <option>Osmanabad</option><option>Nanded</option><option>Beed</option><option>Yavatmal</option>
+                <option>Wardha</option><option>Washim</option><option>Akola</option><option>Buldhana</option>
+                <option>Chandrapur</option><option>Gadchiroli</option><option>Gondia</option><option>Bhandara</option>
+                <option>Raigad</option><option>Ratnagiri</option><option>Sindhudurg</option><option>Thane</option>
+                <option>Palghar</option><option>Dhule</option><option>Nandurbar</option><option>Hingoli</option>
+                <option>Parbhani</option><option>Jalna</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label><span data-i18n="label_address">Residential Address</span> <span class="req">*</span></label>
+            <textarea id="addressVal" placeholder="Flat/House No., Village/Street Name, Land mark" style="width:100%;height:60px;padding:12px;border:2px solid var(--border);border-radius:10px;font-family:inherit" data-i18n-placeholder="label_address"></textarea>
+          </div>
+          <div class="step-actions">
+            <button class="btn-back-step" onclick="prevStep(2)" data-i18n="btn_back">← Back</button>
+            <button class="btn-next" onclick="nextStep(2)" data-i18n="btn_next">Continue →</button>
+          </div>
+        </div>
+
+
+
+        <!-- Step 3: Farm & Crops Information -->
+        <div class="form-step" id="step3">
+          <div class="form-row">
+            <div class="form-group">
+              <label><span data-i18n="label_landOwnership">Land Ownership Type</span> <span class="req">*</span></label>
+              <select id="landOwnership">
+                <option value="" data-i18n="label_select">Select Ownership</option>
+                <option value="Owned">Owned (मालकी)</option>
+                <option value="Leased">Leased (भाडेतत्त्वावर)</option>
+                <option value="Shared">Shared (भागीदारी)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label><span data-i18n="label_surveyNumber">Survey Number (गट क्रमांक)</span> <span class="req">*</span></label>
+              <input type="text" id="surveyNumber" placeholder="E.g. 104/A" data-i18n-placeholder="label_surveyNumber">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label><span data-i18n="label_landSizeAcres">Land Size (Acres)</span> <span class="req">*</span></label>
+              <input type="number" id="landSizeAcres" min="0" placeholder="Acres" value="0" data-i18n-placeholder="label_landSizeAcres">
+            </div>
+            <div class="form-group">
+              <label><span data-i18n="label_landSizeGuntas">Land Size (Guntas)</span> <span class="req">*</span></label>
+              <input type="number" id="landSizeGuntas" min="0" max="39" placeholder="Guntas (1 Acre = 40 Guntas)" value="0" data-i18n-placeholder="label_landSizeGuntas">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label><span data-i18n="label_irrigationType">Irrigation Type</span> <span class="req">*</span></label>
+              <select id="irrigationType">
+                <option value="" data-i18n="label_select">Select Irrigation</option>
+                <option value="Rain-fed">Rain-fed (जिरायती)</option>
+                <option value="Borewell">Borewell (कूपनलिका)</option>
+                <option value="Canal">Canal (कालवा)</option>
+                <option value="Drip Irrigation">Drip Irrigation (ठिबक सिंचन)</option>
+                <option value="Sprinkler">Sprinkler (तुषार सिंचन)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label><span data-i18n="label_farmerCategory">Farmer Category</span> <span class="req">*</span></label>
+              <select id="farmerCategory">
+                <option value="" data-i18n="label_select">Select Category</option>
+                <option value="Marginal Farmer">Marginal Farmer (<= 2.5 Acres)</option>
+                <option value="Small Farmer">Small Farmer (2.5 to 5 Acres)</option>
+                <option value="Medium Farmer">Medium Farmer (5 to 25 Acres)</option>
+                <option value="Large Farmer">Large Farmer (> 25 Acres)</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label style="margin-bottom:10px" data-i18n="label_crop_selection">Crop Selection (Select all that apply) <span class="req">*</span></label>
+            <div class="checkbox-grid" id="cropCheckboxes" style="display:grid; grid-template-columns:repeat(2,1fr); gap:10px">
+              <label class="check-item"><input type="checkbox" name="crops" value="Rice"> Rice (भात)</label>
+              <label class="check-item"><input type="checkbox" name="crops" value="Wheat"> Wheat (गहू)</label>
+              <label class="check-item"><input type="checkbox" name="crops" value="Sugarcane"> Sugarcane (ऊस)</label>
+              <label class="check-item"><input type="checkbox" name="crops" value="Cotton"> Cotton (कापूस)</label>
+              <label class="check-item"><input type="checkbox" name="crops" value="Maize"> Maize (मका)</label>
+              <label class="check-item"><input type="checkbox" name="crops" value="Groundnut"> Groundnut (भुईमूग)</label>
+              <label class="check-item"><input type="checkbox" name="crops" value="Soybean"> Soybean (सोयाबीन)</label>
+              <label class="check-item"><input type="checkbox" name="crops" value="Pulses"> Pulses (कडधान्ये)</label>
+              <label class="check-item"><input type="checkbox" name="crops" value="Vegetables"> Vegetables (भाजीपाला)</label>
+              <label class="check-item"><input type="checkbox" name="crops" value="Fruits"> Fruits (फळे)</label>
+              <label class="check-item"><input type="checkbox" name="crops" value="Horticulture Crops"> Horticulture Crops</label>
+              <label class="check-item"><input type="checkbox" name="crops" value="Other"> Other (इतर)</label>
+            </div>
+          </div>
+          <div class="step-actions">
+            <button class="btn-back-step" onclick="prevStep(3)" data-i18n="btn_back">← Back</button>
+            <button class="btn-next" onclick="nextStep(3)" data-i18n="btn_next">Continue →</button>
+          </div>
+        </div>
+
+        <!-- Step 4: Category & Consent -->
+        <div class="form-step" id="step4">
+          <input type="hidden" id="kycAadhaarUrl" value="">
+          <input type="hidden" id="kycPanUrl" value="">
+          <input type="hidden" id="kycFarmerIdUrl" value="">
+          
+          <div class="form-row">
+            <div class="form-group" style="flex:1">
+              <label><span data-i18n="label_casteCategory">Caste Category</span> <span class="req">*</span></label>
+              <select id="category">
+                <option value="" data-i18n="label_select">Select Caste Category</option>
+                <option value="General">General</option>
+                <option value="SC">SC (Scheduled Caste)</option>
+                <option value="ST">ST (Scheduled Tribe)</option>
+                <option value="OBC">OBC (Other Backward Class)</option>
+              </select>
+            </div>
+            <div class="form-group" style="flex:1">
+              <label><span data-i18n="label_incomeCategory">Income Category</span> <span class="req">*</span></label>
+              <select id="income">
+                <option value="" data-i18n="label_select">Select Income Range</option>
+                <option value="0-50000">Below ₹50,000</option>
+                <option value="50001-100000">₹50,001 – ₹1,00,000</option>
+                <option value="100001-200000">₹1,00,001 – ₹2,00,000</option>
+                <option value="200001-500000">₹2,00,001 – ₹5,00,000</option>
+                <option value="500001+">Above ₹5,00,000</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group" style="margin-top:15px">
+            <label class="check-item">
+              <input type="checkbox" id="consent">
+              <span data-i18n="label_consent">I consent to my data and uploads being used for scheme eligibility matching.</span> <span class="req">*</span>
+            </label>
+          </div>
+          <div class="form-group">
+            <label class="check-item">
+              <input type="checkbox" id="smsConsent">
+              <span data-i18n="label_smsConsent">I agree to receive SMS/WhatsApp updates about new schemes and application status.</span>
+            </label>
+          </div>
+          <div class="step-actions">
+            <button class="btn-back-step" onclick="prevStep(4)" data-i18n="btn_back">← Back</button>
+            <button class="btn-submit" onclick="submitForm()" data-i18n="btn_complete_registration">✅ Complete Registration</button>
+          </div>
+        </div>
+
+        <div class="success-box" id="successBox">
+          <div class="success-icon">🎉</div>
+          <h3 data-i18n="register_success_title">Registration Successful!</h3>
+          <p data-i18n="register_success_desc">Your account has been created. You will be automatically redirected to your dashboard shortly.</p>
+          <button class="btn-primary" onclick="showLogin()" data-i18n="login_btn">🔐 Go to Login</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="resultsModal">
+  <div class="modal">
+    <div class="modal-head">
+      <div>
+        <h2 id="farmerNameDisplay">Results for: Farmer</h2>
+        <p data-i18n="results_modal_subtitle">Personalized scheme recommendations based on your profile</p>
+      </div>
+      <button class="modal-close-btn" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="farmer-summary" id="farmerSummary"></div>
+      <div class="results-count" id="resultsCount"></div>
+      <div id="schemeResults"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Admin Scheme Form Modal -->
+<div class="modal-overlay" id="schemeModal">
+  <div class="modal" style="max-width:700px">
+    <div class="modal-head">
+      <div>
+        <h2 id="schemeModalTitle">Add Government Scheme</h2>
+        <p>Enter the details and criteria for the scheme</p>
+      </div>
+      <button class="modal-close-btn" onclick="closeSchemeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <form id="schemeForm" onsubmit="handleSchemeSubmit(event)">
+        <input type="hidden" id="editSchemeId">
+        <div class="form-row" style="margin-top: 15px">
+          <div class="form-group" style="flex:2">
+            <label>Scheme Name <span class="req">*</span></label>
+            <input type="text" id="schemeName" required placeholder="e.g. Solar Pump Scheme">
+          </div>
+          <div class="form-group" style="flex:1">
+            <label>Icon Emoji <span class="req">*</span></label>
+            <input type="text" id="schemeIcon" required placeholder="e.g. ☀️" value="🌾">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Ministry <span class="req">*</span></label>
+            <input type="text" id="schemeMinistry" required placeholder="e.g. Energy Department, Maharashtra">
+          </div>
+          <div class="form-group">
+            <label>Type of Scheme <span class="req">*</span></label>
+            <input type="text" id="schemeType" required placeholder="e.g. Capital Subsidy">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Description <span class="req">*</span></label>
+          <textarea id="schemeDescription" required style="width:100%;height:80px;padding:12px;border:2px solid var(--border);border-radius:10px;font-family:inherit" placeholder="Explain the scheme details..."></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Benefit Description <span class="req">*</span></label>
+            <input type="text" id="schemeBenefit" required placeholder="e.g. 90% subsidy on solar pump">
+          </div>
+          <div class="form-group">
+            <label>Max Annual Benefit (₹) <span class="req">*</span></label>
+            <input type="number" id="schemeMaxBenefit" required placeholder="e.g. 250000">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Official Apply URL <span class="req">*</span></label>
+            <input type="url" id="schemeApplyUrl" required placeholder="https://...">
+          </div>
+          <div class="form-group">
+            <label>Source Portal Name <span class="req">*</span></label>
+            <input type="text" id="schemeSource" required placeholder="e.g. mahadbt.maharashtra.gov.in">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Target State <span class="req">*</span></label>
+            <input type="text" id="schemeState" required placeholder="e.g. Maharashtra" value="Maharashtra">
+          </div>
+          <div class="form-group">
+            <label>Publish Status <span class="req">*</span></label>
+            <select id="schemeStatus">
+              <option value="published">Published (Visible)</option>
+              <option value="unpublished">Unpublished (Hidden)</option>
+            </select>
+          </div>
+        </div>
+        
+        <h4 style="margin:20px 0 10px;color:var(--green);border-bottom:1px solid var(--border);padding-bottom:6px">Target Eligibility Criteria</h4>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Category Eligibility <span class="req">*</span></label>
+            <select id="schemeCategory">
+              <option value="all">All Categories</option>
+              <option value="SC only">SC Only</option>
+              <option value="ST only">ST Only</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Deadline <span class="req">*</span></label>
+            <input type="text" id="schemeDeadline" required placeholder="e.g. Ongoing" value="Ongoing">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Specific Eligibility Condition <span class="req">*</span></label>
+          <input type="text" id="schemeCondition" required placeholder="e.g. Maharashtra farmer with agricultural land connection">
+        </div>
+        <div class="form-group">
+          <label>Required Documents (Comma separated) <span class="req">*</span></label>
+          <input type="text" id="schemeDocuments" required placeholder="Aadhaar, Land Records, Bank Account" value="Aadhaar, 7/12 Extract, Bank Account">
+        </div>
+        
+        <div class="step-actions" style="margin-top:24px">
+          <button type="button" class="btn-back-step" onclick="closeSchemeModal()">Cancel</button>
+          <button type="submit" class="btn-submit" id="btnSchemeSubmit">Save Scheme</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <h3 data-i18n="topbar_gov">Maharashtra Farmer Portal</h3>
+        <p data-i18n="footer_text">Official Government of Maharashtra portal for farmer welfare schemes. Connecting farmers to benefits through technology.</p>
+      </div>
+      <div class="footer-col">
+        <h4 data-i18n="footer_quick_links">Quick Links</h4>
+        <ul>
+          <li><a href="#home" data-i18n="nav_home">Home</a></li>
+          <li><a href="#schemes" data-i18n="nav_schemes">All Schemes</a></li>
+          <li><a href="#register" data-i18n="nav_register_new">Register</a></li>
+          <li><a href="#dashboard" data-i18n="nav_dashboard">Dashboard</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4 data-i18n="footer_resources">Resources</h4>
+        <ul>
+          <li><a href="#" data-i18n="footer_user_guide">User Guide</a></li>
+          <li><a href="#" data-i18n="footer_faq">FAQ</a></li>
+          <li><a href="#" data-i18n="footer_helpline">Helpline</a></li>
+          <li><a href="#" data-i18n="footer_grievance">Grievance Redressal</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4 data-i18n="footer_contact">Contact</h4>
+        <ul>
+          <li>📞 1800-233-4000</li>
+          <li>📧 support@maharashtra.gov.in</li>
+          <li>🏢 Mumbai, Maharashtra</li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div data-i18n="footer_rights">© 2025 Government of Maharashtra. All Rights Reserved.</div>
+      <div class="gov-badges">
+        <span class="gov-badge">🇮🇳 Official</span>
+        <span class="gov-badge">🔒 Secure</span>
+        <span class="gov-badge">✓ Verified</span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="js/translations.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
